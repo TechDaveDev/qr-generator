@@ -1,18 +1,28 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+
 import { QRCodeCanvas } from 'qrcode.react';
+import { Download, Github, Moon, Sun } from '@/components/icons';
+
 
 export default function QrGeneratorPage() {
   const [text, setText] = useState('https://davidaliaga.vercel.app/');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      setIsDarkMode(true);
+    }
+  }, [])
 
   const handleDownload = () => {
     if (qrRef.current) {
       const canvas = qrRef.current.querySelector('canvas');
       if (canvas) {
         const pngUrl = canvas.toDataURL('image/png');
-
         const downloadLink = document.createElement('a');
         downloadLink.href = pngUrl;
         downloadLink.download = 'codigo-qr.png';
@@ -24,51 +34,99 @@ export default function QrGeneratorPage() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-slate-100 font-sans p-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-2xl transition-shadow duration-300 hover:shadow-indigo-100">
+    <div className={`${isDarkMode ? 'dark' : ''}`}>
+      <main className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-[#0f172a] font-sans p-6 transition-colors duration-500">
 
-        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">
-          Generador de QR
-        </h1>
+        {/* card */}
+        <div className="w-full max-w-[420px] bg-white dark:bg-[#1e293b] rounded-[40px] shadow-2xl dark:shadow-none p-10 space-y-10 border border-slate-100 dark:border-slate-800 transition-colors duration-500">
 
-        <div ref={qrRef} className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-lg border border-slate-200">
-          <QRCodeCanvas
-            value={text || 'https://google.com'}
-            size={256}
-            bgColor={"#ffffff"}
-            fgColor={"#0d1117"}
-            level={"H"}
-            includeMargin={true}
-          />
-        </div>
+          <h1 className="text-[28px] font-bold text-center text-[#4255ff] dark:text-[#818cf8] tracking-tight transition-colors duration-500">
+            Generador de QR
+          </h1>
 
-        <div className="flex flex-col space-y-4">
-          <div>
-            <label htmlFor="text-input" className="mb-2 block font-semibold text-slate-700">
-              Introduce tu texto o URL
-            </label>
-            <input
-              id="text-input"
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
-              placeholder="https://ejemplo.com"
-            />
+          {/* qr area */}
+          <div className="relative">
+            <div className="bg-[#38665c] aspect-square rounded-[32px] flex items-center justify-center p-8 overflow-hidden relative shadow-inner">
+              <div
+                ref={qrRef}
+                className="bg-white aspect-square w-4/5 flex items-center justify-center rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] transform -rotate-1 transition-transform hover:rotate-0 hover:scale-105 duration-300"
+              >
+                <QRCodeCanvas
+                  value={text || 'https://davidaliaga.vercel.app/'}
+                  size={160}
+                  bgColor={"#ffffff"}
+                  fgColor={"#000000"}
+                  level={"H"}
+                />
+              </div>
+            </div>
           </div>
 
-          <button
-            onClick={handleDownload}
-            disabled={!text}
-            className="flex items-center justify-center w-full px-6 py-3 font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Descargar como PNG
-          </button>
+          {/* input */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="text-input" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 transition-colors duration-500">
+                Introduce tu texto o URL
+              </label>
+              <input
+                id="text-input"
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-[#0f172a]/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-colors duration-500"
+                placeholder="https://tulink.com"
+              />
+            </div>
+
+            {/* donwload button */}
+            <button
+              onClick={handleDownload}
+              disabled={!text}
+              className="flex items-center justify-center w-full px-6 py-4 font-bold text-white bg-[#4f46e5] rounded-2xl hover:bg-indigo-600 active:scale-95 transition-all duration-500 shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50"
+            >
+              <Download />
+              Descargar como PNG
+            </button>
+          </div>
         </div>
-      </div>
-    </main>
+
+        {/* buttons */}
+        <div className="mt-10 flex flex-col items-center space-y-6">
+          <div className="flex items-center space-x-3">
+
+            <a
+              href="https://github.com/TechDaveDev"
+              target="_blank"
+              className="flex items-center space-x-2 px-8 py-2.5 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-800 rounded-full text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-500 shadow-sm"
+            >
+              <Github />
+              <span className="font-semibold text-sm">GitHub</span>
+            </a>
+
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-3 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-500 shadow-sm"
+            >
+              {isDarkMode ? (
+                <Sun />
+              ) : (
+                <Moon />
+              )}
+            </button>
+          </div>
+
+          <footer className="text-slate-400 dark:text-slate-500 text-sm font-light">
+            Creado por <a
+              href="https://davidaliaga.vercel.app/"
+              target="_blank"
+              className="hover:text-indigo-500 transition-colors font-medium decoration-slate-200 dark:decoration-slate-800"
+            >
+              David Aliaga
+            </a>
+          </footer>
+        </div>
+
+      </main>
+    </div>
   );
 }
